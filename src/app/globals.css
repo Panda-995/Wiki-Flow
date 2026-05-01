@@ -1,0 +1,268 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --paper: #faf8f5;
+  --paper-dark: #f5f3f0;
+  --ink: #2d2a26;
+  --ink-light: #6b6560;
+  --accent-orange: #e07b39;
+  --accent-blue: #4a7c9b;
+  --accent-green: #6b8e5a;
+  --accent-red: #c45c4a;
+  --spiral: #8b7355;
+  
+  --background: #faf8f5;
+  --foreground: #2d2a26;
+  --card: #ffffff;
+  --card-foreground: #2d2a26;
+  --popover: #ffffff;
+  --popover-foreground: #2d2a26;
+  --primary: #e07b39;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f3f0;
+  --secondary-foreground: #2d2a26;
+  --muted: #f0ede8;
+  --muted-foreground: #6b6560;
+  --accent: #f5f3f0;
+  --accent-foreground: #2d2a26;
+  --destructive: #c45c4a;
+  --destructive-foreground: #ffffff;
+  --border: #e5e0d8;
+  --input: #e5e0d8;
+  --ring: #e07b39;
+  --radius: 0.5rem;
+  --sidebar: #faf8f5;
+  --sidebar-foreground: #2d2a26;
+  --sidebar-primary: #e07b39;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f3f0;
+  --sidebar-accent-foreground: #2d2a26;
+  --sidebar-border: #e5e0d8;
+  --sidebar-ring: #e07b39;
+}
+
+.dark {
+  --paper: #1a1918;
+  --paper-dark: #252320;
+  --ink: #e8e5e0;
+  --ink-light: #9a9590;
+  --accent-orange: #e8956b;
+  --accent-blue: #6a9bb8;
+  --accent-green: #8bb878;
+  --accent-red: #d47a6a;
+  --spiral: #a89580;
+  
+  --background: #1a1918;
+  --foreground: #e8e5e0;
+  --card: #252320;
+  --card-foreground: #e8e5e0;
+  --popover: #252320;
+  --popover-foreground: #e8e5e0;
+  --primary: #e8956b;
+  --primary-foreground: #1a1918;
+  --secondary: #252320;
+  --secondary-foreground: #e8e5e0;
+  --muted: #252320;
+  --muted-foreground: #9a9590;
+  --accent: #252320;
+  --accent-foreground: #e8e5e0;
+  --destructive: #d47a6a;
+  --destructive-foreground: #ffffff;
+  --border: #3a3632;
+  --input: #3a3632;
+  --ring: #e8956b;
+  --sidebar: #1a1918;
+  --sidebar-foreground: #e8e5e0;
+  --sidebar-primary: #e8956b;
+  --sidebar-primary-foreground: #1a1918;
+  --sidebar-accent: #252320;
+  --sidebar-accent-foreground: #e8e5e0;
+  --sidebar-border: #3a3632;
+  --sidebar-ring: #e8956b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.notebook-card {
+  background: var(--card);
+  border-radius: 8px 12px 12px 8px;
+  box-shadow: 
+    0 1px 3px rgba(0,0,0,0.08),
+    0 4px 6px rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.notebook-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, 
+    transparent 0%,
+    var(--primary) 10%,
+    var(--primary) 90%,
+    transparent 100%
+  );
+}
+
+.notebook-input {
+  background: transparent;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.notebook-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(224, 123, 57, 0.1);
+  outline: none;
+}
+
+.notebook-btn {
+  background: var(--primary);
+  color: white;
+  border-radius: 6px 12px 12px 6px;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  transition: all 0.15s ease;
+}
+
+.notebook-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+}
+
+.notebook-btn:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+
+.notebook-outline-btn {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  border-radius: 6px 12px 12px 6px;
+  transition: all 0.2s ease;
+}
+
+.notebook-outline-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.notebook-badge {
+  background: var(--secondary);
+  color: var(--foreground);
+  border-radius: 4px 8px 8px 4px;
+  font-weight: 500;
+}
+
+.notebook-tab {
+  background: var(--secondary);
+  border-radius: 8px 8px 0 0;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notebook-tab:hover {
+  background: var(--muted);
+}
+
+.notebook-tab.active {
+  background: var(--card);
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+}
+
+.notebook-sidebar {
+  background: linear-gradient(90deg, var(--sidebar) 0%, var(--background) 100%);
+  border-right: 1px solid var(--border);
+}
+
+.notebook-header {
+  background: var(--card);
+  border-bottom: 2px solid var(--border);
+  padding: 12px 20px;
+}
+
+.notebook-title {
+  font-weight: 600;
+  color: var(--foreground);
+  position: relative;
+  display: inline-block;
+}
+
+.notebook-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.text-ink {
+  color: var(--foreground);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.05);
+}
+
+.text-muted-ink {
+  color: var(--muted-foreground);
+}

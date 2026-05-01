@@ -1,0 +1,281 @@
+{
+  "version": 1,
+  "skills": {
+    "tdd-guide": {
+      "name": "Tdd Guide",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=tdd-guide",
+      "source": "skillhub",
+      "version": "2.1.1"
+    },
+    "test-case-generator": {
+      "name": "Test Case Generator",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=test-case-generator",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "pr-reviewer": {
+      "name": "pr-reviewer",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=pr-reviewer",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "code-analyzer": {
+      "name": "Code Analyzer",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=code-analyzer",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "log-analyzer": {
+      "name": "Log Analyzer",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=log-analyzer",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "ai-text-humanizer-zh": {
+      "name": "AI 文本净化器（中文版）",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ai-text-humanizer-zh",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "work-report-writer": {
+      "name": "Work Report Writer",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=work-report-writer",
+      "source": "skillhub",
+      "version": "1.3.1"
+    },
+    "prd-to-prototype": {
+      "name": "PRD to Prototype",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=prd-to-prototype",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "ux-researcher-designer": {
+      "name": "Ux Researcher Designer",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ux-researcher-designer",
+      "source": "skillhub",
+      "version": "2.1.1"
+    },
+    "test-patterns": {
+      "name": "Test Patterns",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=test-patterns",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "e2e-test-orchestrator": {
+      "name": "E2e Test Orchestrator",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=e2e-test-orchestrator",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "api-test-automation": {
+      "name": "Api Test Automation",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=api-test-automation",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "afrexai-qa-test-plan": {
+      "name": "QA Test Plan Generator",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=afrexai-qa-test-plan",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "critical-code-reviewer": {
+      "name": "Critical Code Reviewer",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=critical-code-reviewer",
+      "source": "skillhub",
+      "version": "0.1.0"
+    },
+    "project-code-standard": {
+      "name": "Project Code Standard",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=project-code-standard",
+      "source": "skillhub",
+      "version": "0.1.0"
+    },
+    "security-audit": {
+      "name": "Security Audit",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=security-audit",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "clean-code-review": {
+      "name": "Clean Code",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=clean-code-review",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "cody": {
+      "name": "code-review-assistant",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=cody",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "agent-git-oracle": {
+      "name": "Agent Git Oracle",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=agent-git-oracle",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "uncle-bob": {
+      "name": "Uncle  Bob",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=uncle-bob",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "code-refactoring": {
+      "name": "Code Refactoring",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=code-refactoring",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "system-architect": {
+      "name": "System Architect",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=system-architect",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "debug-pro": {
+      "name": "Debug Pro",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=debug-pro",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "runtime-debugging-skill": {
+      "name": "Runtime Debugging Skill",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=runtime-debugging-skill",
+      "source": "skillhub",
+      "version": "0.1.0"
+    },
+    "superpowers-systematic-debugging": {
+      "name": "Superpowers Systematic Debugging",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=superpowers-systematic-debugging",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "bug-fixing": {
+      "name": "bug-fixing",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=bug-fixing",
+      "source": "skillhub",
+      "version": "1.0.3"
+    },
+    "nexus-error-explain": {
+      "name": "NEXUS Error Explain",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=nexus-error-explain",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "humanizer": {
+      "name": "Humanizer",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=humanizer",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "humanize-ai-text": {
+      "name": "Humanize AI text",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=humanize-ai-text",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "humanize-zh": {
+      "name": "中文去AI味",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=humanize-zh",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "unclecheng-reduce-ai-perception-v2": {
+      "name": "文章去AI味工具",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=unclecheng-reduce-ai-perception-v2",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "writing-polish": {
+      "name": "Writing Polish",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=writing-polish",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "chinese-daily-report-generator": {
+      "name": "Chinese Daily Report Generator",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=chinese-daily-report-generator",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "feishu-weekly-report": {
+      "name": "飞书周报",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=feishu-weekly-report",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "smart-weekly-report": {
+      "name": "Report Generator",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=smart-weekly-report",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "work-report": {
+      "name": "工作报告PPT生成技能",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=work-report",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "smart-reporter": {
+      "name": "智能报告生成器",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=smart-reporter",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "design-to-code": {
+      "name": "Design To Code",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=design-to-code",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "ui-design-system": {
+      "name": "Ui Design System",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ui-design-system",
+      "source": "skillhub",
+      "version": "2.1.1"
+    },
+    "ui-design": {
+      "name": "UI Design",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ui-design",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "wireframe": {
+      "name": "Wireframe",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=wireframe",
+      "source": "skillhub",
+      "version": "3.4.1"
+    },
+    "frontend-design-ultimate": {
+      "name": "Frontend Design Ultimate",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=frontend-design-ultimate",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "ui-audit": {
+      "name": "UI Audit",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ui-audit",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "ui-ux-design": {
+      "name": "UI/UX Design Guide",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ui-ux-design",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "human-optimized-frontend": {
+      "name": "human-optimized-frontend",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=human-optimized-frontend",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "accessibility": {
+      "name": "Accessibility",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=accessibility",
+      "source": "skillhub",
+      "version": "0.1.0"
+    }
+  }
+}
