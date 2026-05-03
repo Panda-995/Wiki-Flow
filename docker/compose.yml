@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/panda-995/wiki-project:latest
+    image: ghcr.io/panda-995/wiki-flow:latest
     # To build locally instead, replace the line above with:
     # build:
     #   context: ..

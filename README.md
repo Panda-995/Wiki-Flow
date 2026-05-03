@@ -66,10 +66,10 @@ npm run dev             # http://localhost:3000
 
 ```bash
 # x86 / amd64
-docker pull ghcr.io/panda-995/wiki-project:latest
+docker pull ghcr.io/panda-995/wiki-flow:latest
 
 # ARM / arm64
-docker pull ghcr.io/panda-995/wiki-project:arm
+docker pull ghcr.io/panda-995/wiki-flow:arm
 ```
 
 **Docker Compose**
@@ -200,10 +200,10 @@ npm run dev             # http://localhost:3000
 
 ```bash
 # x86 / amd64
-docker pull ghcr.io/panda-995/wiki-project:latest
+docker pull ghcr.io/panda-995/wiki-flow:latest
 
 # ARM / arm64
-docker pull ghcr.io/panda-995/wiki-project:arm
+docker pull ghcr.io/panda-995/wiki-flow:arm
 ```
 
 **Docker Compose**
