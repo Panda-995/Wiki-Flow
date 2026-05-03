@@ -1,8 +1,10 @@
 services:
   app:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: ghcr.io/panda-995/wiki-project:latest
+    # To build locally instead, replace the line above with:
+    # build:
+    #   context: ..
+    #   dockerfile: docker/Dockerfile
     container_name: wikiflow-app
     ports:
       - "3000:3000"

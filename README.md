@@ -1,10 +1,165 @@
-# WikiFlow - 在线知识管理平台
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" alt="React">
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss" alt="Tailwind">
+  <img src="https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma" alt="Prisma">
+  <img src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite" alt="SQLite">
+  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker" alt="Docker">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+</p>
 
-> 现代化的 Markdown WIKI 系统，支持知识图谱、文件导入、多级访问控制
+<h1 align="center">WikiFlow</h1>
+<p align="center"><strong>Modern Markdown Wiki System</strong> / <strong>现代化 Markdown WIKI 系统</strong></p>
+<p align="center">Knowledge Graph · File Import · Multi-level Access Control</p>
+<p align="center">知识图谱 · 文件导入 · 多级访问控制</p>
 
-## 技术栈
+---
 
-### 前端
+[English](#english) | [中文](#中文)
+
+---
+
+<a name="english"></a>
+## English
+
+### Tech Stack
+
+**Frontend**
+- **Next.js 15** (App Router + RSC)
+- **React 19**
+- **TypeScript 5**
+- **Tailwind CSS 4**
+- **shadcn/ui** + **Radix UI**
+- **Lucide React** (Icons)
+
+**Backend**
+- **Next.js Server Actions** + **API Routes**
+- **Prisma ORM** + **SQLite**
+- **Auth.js v5** (Authentication)
+- **Resend** / **Nodemailer** (Email)
+
+**Security**
+- AES-256-GCM password encryption
+- CSP security headers
+- XSS protection (HTML escaping)
+- File upload magic number detection
+- API rate limiting
+- Access code permission control
+
+### Quick Start
+
+**Requirements:** Node.js 22+
+
+```bash
+npm install
+cp .env.example .env   # Edit .env with your config
+npm run db:generate
+npm run db:push
+npm run db:seed         # Optional: seed sample data
+npm run dev             # http://localhost:3000
+```
+
+### Docker
+
+**Pre-built Images (GitHub Container Registry)**
+
+```bash
+# x86 / amd64
+docker pull ghcr.io/panda-995/wiki-project:latest
+
+# ARM / arm64
+docker pull ghcr.io/panda-995/wiki-project:arm
+```
+
+**Docker Compose**
+
+```bash
+cp .env.example .env
+docker compose -f docker/compose.yml up -d
+```
+
+SQLite data persists via Docker volume — no data loss on container restart.
+
+### Features
+
+- [x] User authentication (Magic Link + Password)
+- [x] Markdown editor & renderer (GFM + Math)
+- [x] Comment system (nested replies)
+- [x] Batch file import (.md & .zip)
+- [x] Category & tag system (tree categories)
+- [x] Admin dashboard (Posts/Categories/Tags/Users/Settings)
+- [x] Access codes (PUBLIC/PROTECTED/PRIVATE)
+- [x] Knowledge graph preview
+- [x] Guestbook
+- [x] System settings (SMTP/Site/Security)
+- [x] Data export (JSON)
+- [x] Audit logs
+- [x] Dark mode
+
+### Project Structure
+
+```
+src/
+├── app/              # Next.js App Router
+│   ├── admin/        # Admin panel
+│   ├── api/          # API routes
+│   ├── posts/        # Articles
+│   ├── graph/        # Knowledge graph
+│   └── guestbook/    # Guestbook
+├── components/       # React components
+├── lib/              # Utilities
+└── actions/          # Server Actions
+
+prisma/
+├── schema.prisma     # Database schema
+└── seed.ts           # Seed data
+
+docker/
+├── compose.yml       # Docker Compose
+└── Dockerfile        # App image
+```
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | SQLite database path | Yes |
+| `AUTH_SECRET` | Auth.js secret | Yes |
+| `AUTH_URL` | Application URL | Yes |
+| `AUTH_RESEND_KEY` | Resend API Key | No |
+| `RESEND_API_KEY` | Resend API Key | No |
+| `EMAIL_FROM` | Sender address | No |
+| `NEXT_PUBLIC_APP_URL` | Public URL | No |
+
+### Database Models
+
+| Model | Description |
+|-------|-------------|
+| User | Users (ADMIN/EDITOR/USER roles) |
+| Post | Articles (Draft/Published/Archived, 3-level access) |
+| Category | Categories (tree structure) |
+| Tag | Tags |
+| Comment | Comments (nested replies) |
+| AccessCode | Access codes (usage limit & expiry) |
+| ImportJob | Import job records |
+| LoginAttempt | Login attempt records |
+| EmailVerificationCode | Email verification codes |
+| SystemSetting | System settings (key-value) |
+| AuditLog | Audit logs |
+
+### License
+
+MIT
+
+---
+
+<a name="中文"></a>
+## 中文
+
+### 技术栈
+
+**前端**
 - **Next.js 15** (App Router + RSC)
 - **React 19**
 - **TypeScript 5**
@@ -12,13 +167,13 @@
 - **shadcn/ui** + **Radix UI**
 - **Lucide React** (图标)
 
-### 后端
+**后端**
 - **Next.js Server Actions** + **API Routes**
 - **Prisma ORM** + **SQLite**
 - **Auth.js v5** (认证)
 - **Resend** / **Nodemailer** (邮件服务)
 
-### 安全
+**安全**
 - AES-256-GCM 密码加密
 - CSP 安全头
 - XSS 防护 (HTML 转义)
@@ -26,60 +181,45 @@
 - API 限流
 - 访问码权限控制
 
-## 快速开始
+### 快速开始
 
-### 环境要求
-- Node.js 22+
+**环境要求：** Node.js 22+
 
-### 1. 安装依赖
 ```bash
 npm install
-```
-
-### 2. 配置环境变量
-```bash
-cp .env.example .env
-# 编辑 .env 文件，填入必要的配置
-```
-
-### 3. 初始化数据库
-```bash
+cp .env.example .env   # 编辑 .env 填入配置
 npm run db:generate
 npm run db:push
-npm run db:seed  # 可选：初始化示例数据
+npm run db:seed         # 可选：初始化示例数据
+npm run dev             # http://localhost:3000
 ```
 
-### 4. 启动开发服务器
+### Docker
+
+**预构建镜像 (GitHub Container Registry)**
+
 ```bash
-npm run dev
+# x86 / amd64
+docker pull ghcr.io/panda-995/wiki-project:latest
+
+# ARM / arm64
+docker pull ghcr.io/panda-995/wiki-project:arm
 ```
 
-访问 http://localhost:3000
-
-## Docker 部署
+**Docker Compose**
 
 ```bash
-# 1. 创建环境变量文件
 cp .env.example .env
-# 编辑 .env，填入真实的 AUTH_SECRET、RESEND_API_KEY 等
-
-# 2. 构建并启动
 docker compose -f docker/compose.yml up -d
-
-# 3. 查看日志
-docker compose -f docker/compose.yml logs -f
-
-# 4. 停止
-docker compose -f docker/compose.yml down
 ```
 
-SQLite 数据库文件通过 Docker volume 持久化存储，容器重启不会丢失数据。
+SQLite 数据通过 Docker volume 持久化，容器重启不丢失数据。
 
-## 功能特性
+### 功能特性
 
 - [x] 用户认证 (邮箱 Magic Link + 密码登录)
 - [x] Markdown 文章编辑与渲染 (GFM + 数学公式)
-- [x] 文章评论系统 (支持回复)
+- [x] 文章评论系统 (支持嵌套回复)
 - [x] 文件批量导入 (支持 .md 和 .zip)
 - [x] 分类与标签系统 (树形分类)
 - [x] 管理后台 (仪表盘/文章/分类/标签/用户/设置)
@@ -91,40 +231,19 @@ SQLite 数据库文件通过 Docker volume 持久化存储，容器重启不会�
 - [x] 审计日志
 - [x] 暗色模式
 
-## 项目结构
+### 项目结构
 
 ```
 src/
 ├── app/              # Next.js App Router 页面
 │   ├── admin/        # 管理后台
-│   │   ├── settings/ # 系统设置
-│   │   └── users/    # 用户管理
 │   ├── api/          # API 路由
-│   │   ├── admin/    # 管理 API
-│   │   ├── posts/    # 文章 API
-│   │   ├── comments/ # 评论 API
-│   │   ├── search/   # 搜索 API
-│   │   ├── upload/   # 上传 API
-│   │   ├── import/   # 导入 API
-│   │   └── graph/    # 知识图谱 API
-│   ├── category/     # 分类页
-│   ├── graph/        # 知识图谱
-│   ├── guestbook/    # 留言板
 │   ├── posts/        # 文章页
-│   └── tag/          # 标签页
+│   ├── graph/        # 知识图谱
+│   └── guestbook/    # 留言板
 ├── components/       # React 组件
-│   ├── admin/        # 管理组件
-│   ├── markdown/     # Markdown 组件
-│   └── ui/           # shadcn/ui 基础组件
 ├── lib/              # 工具函数
-│   ├── auth.ts       # 认证配置
-│   ├── crypto.ts     # 加密工具
-│   ├── mail.ts       # 邮件服务
-│   ├── markdown.ts   # Markdown 渲染
-│   ├── prisma.ts     # 数据库客户端
-│   └── settings-constants.ts  # 设置常量
-├── actions/          # Server Actions
-└── types/            # TypeScript 类型
+└── actions/          # Server Actions
 
 prisma/
 ├── schema.prisma     # 数据库模型
@@ -135,24 +254,7 @@ docker/
 └── Dockerfile        # 应用镜像构建
 ```
 
-## 开发命令
-
-```bash
-# 开发
-npm run dev          # 启动开发服务器
-
-# 代码质量
-npm run lint         # ESLint 检查
-npm run build        # 生产构建
-
-# 数据库
-npm run db:generate  # 生成 Prisma Client
-npm run db:push      # 推送 Schema 到数据库
-npm run db:migrate   # 运行迁移
-npm run db:seed      # 填充示例数据
-```
-
-## 环境变量
+### 环境变量
 
 | 变量 | 说明 | 必填 |
 |------|------|------|
@@ -163,10 +265,8 @@ npm run db:seed      # 填充示例数据
 | `RESEND_API_KEY` | Resend API Key | 否 |
 | `EMAIL_FROM` | 发件人地址 | 否 |
 | `NEXT_PUBLIC_APP_URL` | 公开访问 URL | 否 |
-| `ADMIN_SEED_PASSWORD` | 种子管理员密码 | 否 |
-| `EDITOR_SEED_PASSWORD` | 种子编辑者密码 | 否 |
 
-## 数据库模型
+### 数据库模型
 
 | 模型 | 说明 |
 |------|------|
@@ -182,6 +282,6 @@ npm run db:seed      # 填充示例数据
 | SystemSetting | 系统设置 (键值对存储) |
 | AuditLog | 审计日志 |
 
-## 许可证
+### 许可证
 
 MIT
