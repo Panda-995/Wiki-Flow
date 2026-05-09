@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 import { randomBytes } from "crypto";
 import type { AccessLevel } from "@prisma/client";
 
+function normalizeAccessLevel(level: FormDataEntryValue | null): AccessLevel {
+  return level === "PRIVATE" ? "PRIVATE" : "PROTECTED";
+}
+
 export async function createAccessCode(formData: FormData) {
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
@@ -14,15 +18,18 @@ export async function createAccessCode(formData: FormData) {
 
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
-  const level = (formData.get("level") as AccessLevel) || "PROTECTED";
-  const usageLimit = parseInt(formData.get("usageLimit") as string) || null;
+  const level = normalizeAccessLevel(formData.get("level"));
+  const parsedUsageLimit = parseInt(formData.get("usageLimit") as string);
+  const usageLimit = Number.isInteger(parsedUsageLimit) && parsedUsageLimit > 0
+    ? Math.min(parsedUsageLimit, 1_000_000)
+    : null;
   const expiresAt = formData.get("expiresAt") as string || null;
 
   if (!name) {
     throw new Error("访问码名称不能为空");
   }
 
-  const code = randomBytes(4).toString("hex").toUpperCase();
+  const code = randomBytes(8).toString("hex").toUpperCase();
 
   const accessCode = await prisma.accessCode.create({
     data: {
@@ -57,12 +64,15 @@ export async function validateAccessCode(code: string): Promise<boolean> {
     return false;
   }
 
-  await prisma.accessCode.update({
-    where: { id: accessCode.id },
+  const consumed = await prisma.accessCode.updateMany({
+    where: {
+      id: accessCode.id,
+      ...(accessCode.usageLimit ? { usedCount: { lt: accessCode.usageLimit } } : {}),
+    },
     data: { usedCount: { increment: 1 } },
   });
 
-  return true;
+  return consumed.count === 1;
 }
 
 export async function deleteAccessCode(accessCodeId: string) {

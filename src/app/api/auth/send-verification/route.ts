@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendMail } from "@/lib/mail";
 import { z } from "zod";
 import { randomInt } from "crypto";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const sendSchema = z.object({
   email: z.string().email(),
@@ -27,6 +28,21 @@ export async function POST(req: NextRequest) {
     const { email } = sendSchema.parse(body);
 
     const normalizedEmail = email.toLowerCase().trim();
+    const ip = getClientIp(req.headers);
+    const ipLimit = checkRateLimit(`verification:ip:${ip}`, 20, 60 * 60 * 1000);
+    const emailLimit = checkRateLimit(`verification:email:${normalizedEmail}`, 3, 60 * 60 * 1000);
+
+    if (!ipLimit.allowed || !emailLimit.allowed) {
+      return NextResponse.json(
+        { error: "验证码请求过于频繁，请稍后再试" },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.max(ipLimit.retryAfterSeconds, emailLimit.retryAfterSeconds)),
+          },
+        }
+      );
+    }
 
     const existingUser = await prisma.user.findUnique({
       where: { email: normalizedEmail },
@@ -34,8 +50,8 @@ export async function POST(req: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "该邮箱已被注册" },
-        { status: 400 }
+        { message: "如果该邮箱可以注册，验证码将发送到此邮箱", expiresIn: 0 },
+        { status: 200 }
       );
     }
 
@@ -84,7 +100,13 @@ export async function POST(req: NextRequest) {
       .replace(/\{\{code\}\}/g, code)
       .replace(/\{\{expires\}\}/g, String(validityMinutes));
 
-    await sendMail({ to: normalizedEmail, subject, html });
+    const mailResult = await sendMail({ to: normalizedEmail, subject, html });
+    if (!mailResult.success) {
+      return NextResponse.json(
+        { error: "发送验证码失败" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       { message: "验证码已发送", expiresIn: validityMinutes * 60 },

@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import { useEffect, useState } from "react";
 import { Copy, Check } from "lucide-react";
@@ -12,6 +13,38 @@ import { copyToClipboard } from "@/lib/clipboard";
 interface MarkdownViewerProps {
   content: string;
   className?: string;
+}
+
+function getSafeMarkdownUrl(url?: string, allowDataImage = false): string | undefined {
+  const value = url?.trim();
+  if (!value || value.startsWith("//")) return undefined;
+
+  if (value.startsWith("/") || value.startsWith("#")) {
+    return value;
+  }
+
+  const hasExplicitProtocol = /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(value);
+  if (!hasExplicitProtocol) {
+    return value;
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (["http:", "https:", "mailto:"].includes(parsed.protocol)) {
+      return value;
+    }
+    if (
+      allowDataImage &&
+      parsed.protocol === "data:" &&
+      /^data:image\/(?:png|jpeg|gif|webp);base64,/i.test(value)
+    ) {
+      return value;
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
 }
 
 function CodeBlock({ children, className }: { children: string; className?: string }) {
@@ -50,7 +83,7 @@ export function MarkdownViewer({ content, className }: MarkdownViewerProps) {
     <article className={`prose prose-slate dark:prose-invert max-w-none ${className || ""}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeHighlight]}
+        rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
         components={{
           code({ className, children, ...props }) {
             const isInline = !className;
@@ -68,16 +101,22 @@ export function MarkdownViewer({ content, className }: MarkdownViewerProps) {
             );
           },
           a({ href, children }) {
+            const safeHref = getSafeMarkdownUrl(href);
+            if (!safeHref) {
+              return <span>{children}</span>;
+            }
             return (
-              <a href={href} target="_blank" rel="noopener noreferrer">
+              <a href={safeHref} target="_blank" rel="noopener noreferrer">
                 {children}
               </a>
             );
           },
           img({ src, alt }) {
+            const safeSrc = getSafeMarkdownUrl(typeof src === "string" ? src : undefined, true);
+            if (!safeSrc) return null;
             return (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={src} alt={alt || ""} className="rounded-lg max-w-full" loading="lazy" />
+              <img src={safeSrc} alt={alt || ""} className="rounded-lg max-w-full" loading="lazy" />
             );
           },
         }}

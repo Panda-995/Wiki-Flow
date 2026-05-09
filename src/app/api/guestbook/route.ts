@@ -58,7 +58,7 @@ export async function GET() {
       where: { postId: null, isPublic: true },
       orderBy: { createdAt: "desc" },
       include: {
-        author: { select: { name: true, email: true } },
+        author: { select: { name: true } },
       },
     });
 

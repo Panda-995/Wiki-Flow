@@ -3,11 +3,22 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+function getSeedPassword(envName: string, developmentFallback: string): string {
+  const password = process.env[envName];
+  if (password) return password;
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(`${envName} must be set when seeding production data`);
+  }
+
+  return developmentFallback;
+}
+
 async function main() {
   console.log("开始填充种子数据...");
 
   const adminPassword = await bcrypt.hash(
-    process.env.ADMIN_SEED_PASSWORD || "admin123",
+    getSeedPassword("ADMIN_SEED_PASSWORD", "admin123"),
     12
   );
 
@@ -35,7 +46,7 @@ async function main() {
   });
 
   const editorPassword = await bcrypt.hash(
-    process.env.EDITOR_SEED_PASSWORD || "editor123",
+    getSeedPassword("EDITOR_SEED_PASSWORD", "editor123"),
     12
   );
 
@@ -151,7 +162,7 @@ WikiFlow 是一个现代化的知识管理平台，支持 Markdown 写作、文�
   });
 
   console.log("种子数据填充完成！");
-  console.log("管理员账号: admin@wikiflow.dev / admin123");
+  console.log("管理员账号: admin@wikiflow.dev");
   console.log("编辑者账号: editor@wikiflow.dev");
 }
 

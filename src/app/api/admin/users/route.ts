@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,17 @@ export async function GET() {
 
     const users = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        role: true,
+        emailVerified: true,
+        lockedUntil: true,
+        failedAttempts: true,
+        createdAt: true,
+        updatedAt: true,
         _count: { select: { posts: true, comments: true } },
       },
     });
@@ -62,6 +73,14 @@ export async function PUT(req: NextRequest) {
       data: updateData,
     });
 
+    await logAudit({
+      userId: session.user.id,
+      action: "UPDATE",
+      entity: "user",
+      entityId: userId,
+      detail: "Updated user role or lock status",
+    });
+
     return NextResponse.json({ message: "更新成功" });
   } catch (error) {
     console.error("Update user error:", error);
@@ -88,6 +107,14 @@ export async function DELETE(req: NextRequest) {
     }
 
     await prisma.user.delete({ where: { id: userId } });
+
+    await logAudit({
+      userId: session.user.id,
+      action: "DELETE",
+      entity: "user",
+      entityId: userId,
+      detail: "Deleted user",
+    });
 
     return NextResponse.json({ message: "删除成功" });
   } catch (error) {

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hash, compare } from "bcryptjs";
 import { z } from "zod";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "请输入当前密码"),
@@ -14,6 +15,15 @@ export async function PUT(req: NextRequest) {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
+    }
+
+    const ip = getClientIp(req.headers);
+    const limit = checkRateLimit(`change-password:${session.user.id}:${ip}`, 5, 15 * 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "尝试过于频繁，请稍后再试" },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      );
     }
 
     const body = await req.json();

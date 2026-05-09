@@ -32,9 +32,29 @@ function detectTypeByMagic(buffer: Buffer): string | null {
   return null;
 }
 
-function isSvgByContent(buffer: Buffer): boolean {
-  const head = buffer.slice(0, 256).toString("utf8").toLowerCase().trimStart();
-  return head.startsWith("<?xml") || head.startsWith("<svg") || head.startsWith("<!doctype svg");
+function sanitizeSvgContent(buffer: Buffer): Buffer | null {
+  const text = buffer.toString("utf8").replace(/^\uFEFF/, "");
+  const head = text.slice(0, 512).toLowerCase().trimStart();
+
+  if (
+    !head.startsWith("<?xml") &&
+    !head.startsWith("<svg") &&
+    !head.startsWith("<!doctype svg")
+  ) {
+    return null;
+  }
+
+  const dangerousPatterns = [
+    /<\s*(script|foreignObject|iframe|object|embed|link|meta|style)\b/i,
+    /\son[a-z]+\s*=/i,
+    /\b(?:href|xlink:href|src)\s*=\s*["']?\s*(?:javascript:|vbscript:|data:)/i,
+  ];
+
+  if (dangerousPatterns.some((pattern) => pattern.test(text))) {
+    return null;
+  }
+
+  return Buffer.from(text, "utf8");
 }
 
 export async function POST(req: NextRequest) {
@@ -63,12 +83,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    let buffer: Buffer<ArrayBufferLike> = Buffer.from(await file.arrayBuffer());
 
     if (ext === "svg") {
-      if (!isSvgByContent(buffer)) {
-        return NextResponse.json({ error: "文件内容不是有效的 SVG" }, { status: 400 });
+      const sanitizedSvg = sanitizeSvgContent(buffer);
+      if (!sanitizedSvg) {
+        return NextResponse.json({ error: "SVG 文件包含不安全内容或格式无效" }, { status: 400 });
       }
+      buffer = sanitizedSvg;
     } else {
       const detectedType = detectTypeByMagic(buffer);
       if (!detectedType) {

@@ -96,7 +96,7 @@ function AnimatedInput({
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"), "/");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -244,6 +244,11 @@ function LoginForm() {
       </p>
     </div>
   );
+}
+
+function getSafeCallbackUrl(value: string | null, fallback: string): string {
+  if (!value) return fallback;
+  return value.startsWith("/") && !value.startsWith("//") ? value : fallback;
 }
 
 export default function LoginPage() {

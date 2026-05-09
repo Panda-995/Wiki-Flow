@@ -1,24 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import type { AccessLevel } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-async function verifyAccessCode(code: string): Promise<boolean> {
+async function verifyAccessCode(code: string): Promise<AccessLevel | null> {
   const accessCode = await prisma.accessCode.findUnique({
     where: { code },
   });
 
-  if (!accessCode || !accessCode.isActive) return false;
-  if (accessCode.expiresAt && new Date(accessCode.expiresAt) < new Date()) return false;
-  if (accessCode.usageLimit && accessCode.usedCount >= accessCode.usageLimit) return false;
+  if (!accessCode || !accessCode.isActive) return null;
+  if (accessCode.expiresAt && new Date(accessCode.expiresAt) < new Date()) return null;
+  if (accessCode.usageLimit && accessCode.usedCount >= accessCode.usageLimit) return null;
 
-  await prisma.accessCode.update({
-    where: { id: accessCode.id },
+  const consumed = await prisma.accessCode.updateMany({
+    where: {
+      id: accessCode.id,
+      ...(accessCode.usageLimit ? { usedCount: { lt: accessCode.usageLimit } } : {}),
+    },
     data: { usedCount: { increment: 1 } },
   });
 
-  return true;
+  return consumed.count === 1 ? accessCode.level : null;
+}
+
+const SORT_OPTIONS = {
+  createdAt_desc: { createdAt: "desc" as const },
+  createdAt_asc: { createdAt: "asc" as const },
+  publishedAt_desc: { publishedAt: "desc" as const },
+  publishedAt_asc: { publishedAt: "asc" as const },
+  title_asc: { title: "asc" as const },
+  title_desc: { title: "desc" as const },
+  viewCount_desc: { viewCount: "desc" as const },
+  viewCount_asc: { viewCount: "asc" as const },
+};
+
+function parsePositiveInt(value: string | null, fallback: number, max: number): number {
+  const parsed = Number.parseInt(value || "", 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.min(parsed, max);
 }
 
 export async function GET(req: NextRequest) {
@@ -26,8 +47,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const isAdmin = searchParams.get("admin") === "true";
     const accessCode = searchParams.get("accessCode");
-    const page = parseInt(searchParams.get("page") || "1");
-    const pageSize = parseInt(searchParams.get("pageSize") || "9");
+    const page = parsePositiveInt(searchParams.get("page"), 1, 10_000);
+    const pageSize = parsePositiveInt(searchParams.get("pageSize"), 9, 50);
     const sort = searchParams.get("sort") || "createdAt_desc";
 
     const session = isAdmin ? await auth() : null;
@@ -35,10 +56,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "无权限" }, { status: 403 });
     }
 
-    let hasAccessCode = false;
+    let accessCodeLevel: AccessLevel | null = null;
     if (accessCode) {
-      hasAccessCode = await verifyAccessCode(accessCode);
+      accessCodeLevel = await verifyAccessCode(accessCode);
     }
+
+    const accessCodeRules =
+      accessCodeLevel === "PRIVATE"
+        ? [{ accessLevel: "PROTECTED" as const }, { accessLevel: "PRIVATE" as const }]
+        : accessCodeLevel === "PROTECTED"
+          ? [{ accessLevel: "PROTECTED" as const }]
+          : [];
 
     const where: Record<string, unknown> = isAdmin
       ? {}
@@ -47,13 +75,12 @@ export async function GET(req: NextRequest) {
           OR: [
             { accessLevel: "PUBLIC" as const },
             ...(session?.user ? [{ accessLevel: "PROTECTED" as const }] : []),
-            ...(hasAccessCode ? [{ accessLevel: "PROTECTED" as const }, { accessLevel: "PRIVATE" as const }] : []),
+            ...accessCodeRules,
             ...(session?.user ? [{ accessLevel: "PRIVATE" as const, authorId: session.user.id }] : []),
           ],
         };
 
-    const [sortField, sortDir] = sort.split("_");
-    const orderBy = { [sortField || "createdAt"]: sortDir === "asc" ? "asc" as const : "desc" as const };
+    const orderBy = SORT_OPTIONS[sort as keyof typeof SORT_OPTIONS] || SORT_OPTIONS.createdAt_desc;
 
     const [posts, total] = await Promise.all([
       prisma.post.findMany({

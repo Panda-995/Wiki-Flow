@@ -13,6 +13,7 @@ services:
       - DATABASE_URL=file:/data/wikiflow.db
       - AUTH_SECRET=${AUTH_SECRET}
       - AUTH_URL=${AUTH_URL:-http://localhost:3000}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - AUTH_RESEND_KEY=${AUTH_RESEND_KEY}
       - RESEND_API_KEY=${RESEND_API_KEY}
       - EMAIL_FROM=${EMAIL_FROM:-noreply@wikiflow.dev}

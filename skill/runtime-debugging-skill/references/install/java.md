@@ -27,15 +27,14 @@ Add these properties and the repository to your `pom.xml`.
 
 ```xml
     <properties>
-        <syncause.repo.token.p1>github_pat_11B3DNTTY0J3sz8C2CQUuT_fDRzzDxHDeWYrwgAGDzzD</syncause.repo.token.p1>
-        <syncause.repo.token.p2>7rsIhveWt8Y4wEORjxqkIiD6W2A2CWqovpdcE0</syncause.repo.token.p2>
+        <syncause.repo.token>${env.SYNCAUSE_REPO_TOKEN}</syncause.repo.token>
     </properties>
 
     <repositories>
         <repository>
             <id>github-syncause</id>
             <name>GitHub Packages</name>
-            <url>https://syn-cause:${syncause.repo.token.p1}${syncause.repo.token.p2}@maven.pkg.github.com/Syncause/syncause-sdk</url>
+            <url>https://syn-cause:${syncause.repo.token}@maven.pkg.github.com/Syncause/syncause-sdk</url>
         </repository>
     </repositories>
 ```

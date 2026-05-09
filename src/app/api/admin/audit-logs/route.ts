@@ -4,6 +4,12 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+function parsePositiveInt(value: string | null, fallback: number, max: number): number {
+  const parsed = Number.parseInt(value || "", 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.min(parsed, max);
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
@@ -12,8 +18,8 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "50");
+    const page = parsePositiveInt(searchParams.get("page"), 1, 10_000);
+    const limit = parsePositiveInt(searchParams.get("limit"), 50, 200);
     const action = searchParams.get("action") || "";
 
     const where: Record<string, unknown> = {};

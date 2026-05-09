@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, User, Eye, ArrowRight, Clock, Share2, Bookmark, BookOpen, List, Gauge, FolderTree, Tags } from "lucide-react";
 import { CommentSection } from "@/components/comment-section";
+import { MarkdownViewer } from "@/components/markdown/markdown-viewer";
 
 interface PostData {
   id: string;
@@ -255,10 +256,7 @@ export default function PostPage({ params }: PostPageProps) {
                 )}
               </header>
 
-              <div 
-                className="prose prose-lg max-w-none"
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
-              />
+              <MarkdownViewer content={post.content} className="prose-lg" />
 
               <div className="mt-16 pt-8 border-t">
                 <div className="flex items-center justify-between">
@@ -382,56 +380,4 @@ export default function PostPage({ params }: PostPageProps) {
       </div>
     </>
   );
-}
-
-function renderMarkdown(content: string): string {
-  let html = content;
-
-  html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-    const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    return `
-      <div class="code-block relative group">
-        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button class="copy-btn px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded" data-code="${encodeURIComponent(code.trim())}">
-            复制
-          </button>
-        </div>
-        <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code class="language-${lang || 'text'}">${escapedCode}</code></pre>
-      </div>
-    `;
-  });
-
-  html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm">$1</code>');
-
-  const toSlug = (text: string) => text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, '');
-
-  html = html.replace(/^### (.*$)/gm, (match, text) => {
-    const id = toSlug(text);
-    return `<h3 id="${id}">${text}</h3>`;
-  });
-  html = html.replace(/^## (.*$)/gm, (match, text) => {
-    const id = toSlug(text);
-    return `<h2 id="${id}">${text}</h2>`;
-  });
-  html = html.replace(/^# (.*$)/gm, (match, text) => {
-    const id = toSlug(text);
-    return `<h1 id="${id}">${text}</h1>`;
-  });
-
-  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary hover:underline">$1</a>');
-
-  html = html.replace(/^> (.*$)/gm, '<blockquote class="border-l-4 border-primary/30 pl-4 my-4">$1</blockquote>');
-
-  const paragraphs = html.split('\n\n');
-  html = paragraphs.map(p => {
-    if (!p.trim().match(/^<(?:h[1-6]|div|ul|ol|pre|blockquote|code-block)/)) {
-      return `<p>${p.trim()}</p>`;
-    }
-    return p;
-  }).join('\n');
-
-  return html;
 }

@@ -1,86 +1,26 @@
 "use client";
 
-import { useState, Suspense, useCallback, useEffect, useRef } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserPlus, Mail, Lock, User, Loader2, XCircle, CheckCircle2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { UserPlus, Mail, Lock, User, Loader2, XCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/login";
+  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"), "/login");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSendingCode, setIsSendingCode] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
-  const startCountdown = useCallback((seconds: number) => {
-    setCountdown(seconds);
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
-
-  const handleSendCode = async () => {
-    if (!email || isSendingCode || countdown > 0) return;
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("请输入有效的邮箱地址");
-      return;
-    }
-
-    setIsSendingCode(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/auth/send-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "发送验证码失败");
-      }
-
-      setCodeSent(true);
-      setSuccess("验证码已发送到您的邮箱（开发模式：请查看服务器控制台）");
-      startCountdown(60);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "发送验证码失败");
-    } finally {
-      setIsSendingCode(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,11 +47,6 @@ function RegisterForm() {
       return;
     }
 
-    if (!verificationCode || verificationCode.length !== 6) {
-      setError("请输入 6 位验证码");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -122,7 +57,6 @@ function RegisterForm() {
           name: name.trim(),
           email: email.trim(),
           password,
-          verificationCode,
         }),
       });
 
@@ -133,7 +67,7 @@ function RegisterForm() {
       }
 
       setSuccess("注册成功！正在跳转到登录页...");
-      setTimeout(() => router.push(callbackUrl), 1000);
+      setTimeout(() => router.push(callbackUrl), 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : "注册失败，请稍后重试");
     } finally {
@@ -183,61 +117,17 @@ function RegisterForm() {
               <Label htmlFor="email" className="text-sm font-medium">
                 邮箱地址
               </Label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setCodeSent(false);
-                    }}
-                    placeholder="your@email.com"
-                    className="pl-10 h-11"
-                    required
-                    autoComplete="email"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-11 whitespace-nowrap flex-shrink-0"
-                  onClick={handleSendCode}
-                  disabled={isSendingCode || countdown > 0 || !email}
-                >
-                  {isSendingCode ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : countdown > 0 ? (
-                    `${countdown}s`
-                  ) : codeSent ? (
-                    "重新发送"
-                  ) : (
-                    "获取验证码"
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="code" className="text-sm font-medium">
-                验证码
-              </Label>
               <div className="relative">
-                <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="code"
-                  value={verificationCode}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-                    setVerificationCode(val);
-                  }}
-                  placeholder="输入 6 位验证码"
-                  className="pl-10 h-11 tracking-[0.3em] text-center text-lg"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="pl-10 h-11"
                   required
-                  maxLength={6}
-                  autoComplete="one-time-code"
+                  autoComplete="email"
                 />
               </div>
             </div>
@@ -299,7 +189,7 @@ function RegisterForm() {
             <Button
               type="submit"
               className="w-full h-12 text-base font-medium transition-all duration-200 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0"
-              disabled={isLoading || !name || !email || !password || !confirmPassword || !verificationCode}
+              disabled={isLoading || !name || !email || !password || !confirmPassword}
             >
               {isLoading ? (
                 <>
@@ -347,6 +237,11 @@ function RegisterForm() {
       </p>
     </div>
   );
+}
+
+function getSafeCallbackUrl(value: string | null, fallback: string): string {
+  if (!value) return fallback;
+  return value.startsWith("/") && !value.startsWith("//") ? value : fallback;
 }
 
 export default function RegisterPage() {

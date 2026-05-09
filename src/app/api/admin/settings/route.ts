@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
 import { DEFAULT_SETTINGS, ALLOWED_SETTINGS_KEYS } from "@/lib/settings-constants";
 import { Prisma } from "@prisma/client";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,13 @@ export async function PUT(req: NextRequest) {
     }
 
     await prisma.$transaction(operations);
+
+    await logAudit({
+      userId: session.user.id,
+      action: "UPDATE",
+      entity: "system_settings",
+      detail: "Updated system settings",
+    });
 
     return NextResponse.json({ message: "设置已保存" });
   } catch (error) {

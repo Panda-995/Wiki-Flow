@@ -5,7 +5,9 @@ When tasked with installing the TS/JS Probe into a project, follow this prioriti
 ## 1. Automated Installation
 Identify the project type (Next.js, TypeScript, or JavaScript) and run the installer directly from GitHub:
 ```bash
-curl -sL https://raw.githubusercontent.com/Syncause/ts-agent-file/v1.6.0/install_probe.sh | bash
+curl -fsSLo /tmp/install_probe.sh https://raw.githubusercontent.com/Syncause/ts-agent-file/v1.6.0/install_probe.sh
+less /tmp/install_probe.sh
+bash /tmp/install_probe.sh
 ```
 *Note: For Next.js projects, the script downloads `instrumentation.node.next.ts` from GitHub (default `v1.3.0`) and renames it to `instrumentation.node.ts`.*
 

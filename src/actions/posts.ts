@@ -6,6 +6,17 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { slugify, extractExcerpt } from "@/lib/markdown";
 import type { PostStatus } from "@prisma/client";
+import { logAudit } from "@/lib/audit";
+
+function canPublish(role: string): boolean {
+  return role === "ADMIN" || role === "EDITOR";
+}
+
+function normalizePostStatus(value: FormDataEntryValue | null): PostStatus {
+  return value === "PUBLISHED" || value === "ARCHIVED" || value === "DRAFT"
+    ? value
+    : "DRAFT";
+}
 
 export async function createPost(formData: FormData) {
   const session = await auth();
@@ -15,7 +26,10 @@ export async function createPost(formData: FormData) {
 
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
-  const status = (formData.get("status") as PostStatus) || "DRAFT";
+  const requestedStatus = normalizePostStatus(formData.get("status"));
+  const status = requestedStatus === "PUBLISHED" && !canPublish(session.user.role)
+    ? "DRAFT"
+    : requestedStatus;
   const categoryId = formData.get("categoryId") as string | null;
   const tagsString = formData.get("tags") as string;
 
@@ -62,6 +76,13 @@ export async function createPost(formData: FormData) {
 
   revalidatePath("/posts");
   revalidatePath("/");
+  await logAudit({
+    userId: session.user.id,
+    action: "CREATE",
+    entity: "post",
+    entityId: post.id,
+    detail: `Created post "${post.title}"`,
+  });
   redirect(`/posts/${post.slug}`);
 }
 
@@ -73,7 +94,7 @@ export async function updatePost(postId: string, formData: FormData) {
 
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
-  const status = (formData.get("status") as PostStatus) || "DRAFT";
+  const requestedStatus = normalizePostStatus(formData.get("status"));
   const categoryId = formData.get("categoryId") as string | null;
   const tagsString = formData.get("tags") as string;
 
@@ -92,6 +113,10 @@ export async function updatePost(postId: string, formData: FormData) {
   if (existingPost.authorId !== session.user.id && session.user.role !== "ADMIN") {
     throw new Error("无权限编辑此文章");
   }
+
+  const status = requestedStatus === "PUBLISHED" && !canPublish(session.user.role)
+    ? existingPost.status === "PUBLISHED" ? "PUBLISHED" : "DRAFT"
+    : requestedStatus;
 
   const slug = title !== existingPost.title ? slugify(title) : existingPost.slug;
   const excerpt = extractExcerpt(content);
@@ -125,6 +150,13 @@ export async function updatePost(postId: string, formData: FormData) {
 
   revalidatePath("/posts");
   revalidatePath(`/posts/${post.slug}`);
+  await logAudit({
+    userId: session.user.id,
+    action: "UPDATE",
+    entity: "post",
+    entityId: post.id,
+    detail: `Updated post "${post.title}"`,
+  });
   redirect(`/posts/${post.slug}`);
 }
 
@@ -151,5 +183,12 @@ export async function deletePost(postId: string) {
   });
 
   revalidatePath("/posts");
+  await logAudit({
+    userId: session.user.id,
+    action: "DELETE",
+    entity: "post",
+    entityId: postId,
+    detail: `Deleted post "${post.title}"`,
+  });
   redirect("/posts");
 }

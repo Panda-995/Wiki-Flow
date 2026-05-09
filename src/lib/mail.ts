@@ -111,6 +111,10 @@ export async function sendMail({ to, subject, html }: SendMailOptions): Promise<
     }
   }
 
+  if (process.env.NODE_ENV === "production") {
+    return { success: false, error: "No mail provider configured" };
+  }
+
   console.log(`[DEV MAIL] To: ${to}`);
   console.log(`[DEV MAIL] Subject: ${subject}`);
   console.log(`[DEV MAIL] Body: ${html}`);

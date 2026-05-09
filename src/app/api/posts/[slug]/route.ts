@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { renderMarkdown, extractHeadings } from "@/lib/markdown";
+import type { AccessLevel } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-async function verifyAccessCode(code: string): Promise<boolean> {
+const ACCESS_LEVEL_RANK: Record<AccessLevel, number> = {
+  PUBLIC: 0,
+  PROTECTED: 1,
+  PRIVATE: 2,
+};
+
+async function verifyAccessCode(code: string, requiredLevel: AccessLevel): Promise<boolean> {
   const accessCode = await prisma.accessCode.findUnique({
     where: { code },
   });
@@ -13,13 +20,17 @@ async function verifyAccessCode(code: string): Promise<boolean> {
   if (!accessCode || !accessCode.isActive) return false;
   if (accessCode.expiresAt && new Date(accessCode.expiresAt) < new Date()) return false;
   if (accessCode.usageLimit && accessCode.usedCount >= accessCode.usageLimit) return false;
+  if (ACCESS_LEVEL_RANK[accessCode.level] < ACCESS_LEVEL_RANK[requiredLevel]) return false;
 
-  await prisma.accessCode.update({
-    where: { id: accessCode.id },
+  const consumed = await prisma.accessCode.updateMany({
+    where: {
+      id: accessCode.id,
+      ...(accessCode.usageLimit ? { usedCount: { lt: accessCode.usageLimit } } : {}),
+    },
     data: { usedCount: { increment: 1 } },
   });
 
-  return true;
+  return consumed.count === 1;
 }
 
 export async function GET(
@@ -52,7 +63,7 @@ export async function GET(
         if (!isAuthor && !isAdmin) {
           const { searchParams } = new URL(req.url);
           const accessCode = searchParams.get("accessCode");
-          if (!accessCode || !(await verifyAccessCode(accessCode))) {
+          if (!accessCode || !(await verifyAccessCode(accessCode, "PRIVATE"))) {
             return NextResponse.json({ error: "需要访问码", accessLevel: post.accessLevel }, { status: 403 });
           }
         }
@@ -62,7 +73,7 @@ export async function GET(
         if (!session?.user) {
           const { searchParams } = new URL(req.url);
           const accessCode = searchParams.get("accessCode");
-          if (!accessCode || !(await verifyAccessCode(accessCode))) {
+          if (!accessCode || !(await verifyAccessCode(accessCode, "PROTECTED"))) {
             return NextResponse.json({ error: "需要访问码", accessLevel: post.accessLevel }, { status: 403 });
           }
         }

@@ -3,18 +3,32 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { parseMarkdown, slugify } from "@/lib/markdown";
 import type { PostStatus } from "@prisma/client";
+import { logAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_ZIP_SIZE = 50 * 1024 * 1024;
 const MAX_ZIP_FILES = 500;
+const MAX_ZIP_UNCOMPRESSED_SIZE = 100 * 1024 * 1024;
+const ALLOWED_IMPORT_EXTENSIONS = [".md", ".markdown"];
 
 interface ImportResult {
   success: boolean;
   slug?: string;
   title?: string;
   error?: string;
+}
+
+function hasMarkdownExtension(fileName: string): boolean {
+  const lowerName = fileName.toLowerCase();
+  return ALLOWED_IMPORT_EXTENSIONS.some((ext) => lowerName.endsWith(ext));
+}
+
+function getZipEntryUncompressedSize(entry: unknown): number | null {
+  const zipEntry = entry as { _data?: { uncompressedSize?: number } };
+  const size = zipEntry._data?.uncompressedSize;
+  return typeof size === "number" && Number.isFinite(size) ? size : null;
 }
 
 async function parseAndCreatePost(
@@ -80,7 +94,11 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-    const conflictStrategy = (formData.get("strategy") as "skip" | "overwrite" | "rename") || "skip";
+    const requestedStrategy = formData.get("strategy");
+    const conflictStrategy =
+      requestedStrategy === "overwrite" || requestedStrategy === "rename"
+        ? requestedStrategy
+        : "skip";
 
     if (!file) {
       return NextResponse.json({ error: "未上传文件" }, { status: 400 });
@@ -88,6 +106,10 @@ export async function POST(req: NextRequest) {
 
     const fileName = file.name;
     const isZip = fileName.toLowerCase().endsWith(".zip");
+
+    if (!isZip && !hasMarkdownExtension(fileName)) {
+      return NextResponse.json({ error: "仅支持导入 Markdown 或 ZIP 文件" }, { status: 400 });
+    }
 
     if (isZip) {
       if (file.size > MAX_ZIP_SIZE) {
@@ -109,6 +131,19 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `ZIP 中文件数量不能超过 ${MAX_ZIP_FILES} 个` }, { status: 400 });
       }
 
+      let totalUncompressedSize = 0;
+      for (const mdFileName of mdFiles) {
+        const uncompressedSize = getZipEntryUncompressedSize(zip.files[mdFileName]);
+        if (uncompressedSize === null) continue;
+        if (uncompressedSize > MAX_FILE_SIZE) {
+          return NextResponse.json({ error: `ZIP 内单个 Markdown 文件不能超过 ${MAX_FILE_SIZE / 1024 / 1024}MB` }, { status: 400 });
+        }
+        totalUncompressedSize += uncompressedSize;
+        if (totalUncompressedSize > MAX_ZIP_UNCOMPRESSED_SIZE) {
+          return NextResponse.json({ error: `ZIP 解压后总内容不能超过 ${MAX_ZIP_UNCOMPRESSED_SIZE / 1024 / 1024}MB` }, { status: 400 });
+        }
+      }
+
       const job = await prisma.importJob.create({
         data: {
           fileName,
@@ -123,6 +158,12 @@ export async function POST(req: NextRequest) {
 
       for (const mdFileName of mdFiles) {
         const fileContent = await zip.files[mdFileName].async("string");
+        if (Buffer.byteLength(fileContent, "utf8") > MAX_FILE_SIZE) {
+          const result = { success: false, error: `文件 "${mdFileName}" 超过 ${MAX_FILE_SIZE / 1024 / 1024}MB，跳过` };
+          results.push(result);
+          failCount++;
+          continue;
+        }
         const result = await parseAndCreatePost(
           fileContent,
           mdFileName,
@@ -145,6 +186,14 @@ export async function POST(req: NextRequest) {
           status: "completed",
           errors: results.filter((r) => !r.success).map((r) => r.error).filter((e): e is string => Boolean(e)),
         },
+      });
+
+      await logAudit({
+        userId: session.user.id,
+        action: "IMPORT",
+        entity: "post",
+        entityId: job.id,
+        detail: `Imported ZIP "${fileName}" (${successCount} succeeded, ${failCount} failed)`,
       });
 
       return NextResponse.json({
@@ -170,6 +219,14 @@ export async function POST(req: NextRequest) {
       if (!result.success) {
         return NextResponse.json(result, { status: 400 });
       }
+
+      await logAudit({
+        userId: session.user.id,
+        action: "IMPORT",
+        entity: "post",
+        entityId: result.slug,
+        detail: `Imported Markdown "${fileName}"`,
+      });
 
       return NextResponse.json({
         isSuccess: true,

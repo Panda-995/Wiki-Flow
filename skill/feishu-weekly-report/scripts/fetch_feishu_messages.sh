@@ -1,16 +1,24 @@
 #!/bin/bash
 # Fetch Feishu chat messages for a given chat_id and time range
-# Usage: fetch_feishu_messages.sh <app_id> <app_secret> <chat_id> <start_ts_seconds> <end_ts_seconds>
+# Usage: FEISHU_APP_SECRET=... fetch_feishu_messages.sh <app_id> <chat_id> <start_ts_seconds> <end_ts_seconds>
+# Backward compatible: fetch_feishu_messages.sh <app_id> <app_secret> <chat_id> <start_ts_seconds> <end_ts_seconds>
 # Output: one JSON per message line (sender_type, sender_id, msg_type, content, create_time)
 # Note: timestamps are in SECONDS (not milliseconds)
 
 set -euo pipefail
 
-APP_ID="${1:?Usage: $0 <app_id> <app_secret> <chat_id> <start_ts_s> <end_ts_s>}"
-APP_SECRET="${2:?}"
-CHAT_ID="${3:?}"
-START_TS="${4:?}"
-END_TS="${5:?}"
+APP_ID="${1:?Usage: FEISHU_APP_SECRET=... $0 <app_id> <chat_id> <start_ts_s> <end_ts_s>}"
+if [ -n "${FEISHU_APP_SECRET:-}" ]; then
+  APP_SECRET="$FEISHU_APP_SECRET"
+  CHAT_ID="${2:?}"
+  START_TS="${3:?}"
+  END_TS="${4:?}"
+else
+  APP_SECRET="${2:?Set FEISHU_APP_SECRET or pass <app_secret> as the second argument}"
+  CHAT_ID="${3:?}"
+  START_TS="${4:?}"
+  END_TS="${5:?}"
+fi
 
 TOKEN=$(curl -s -X POST 'https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal' \
   -H 'Content-Type: application/json' \
