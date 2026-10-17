@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma" alt="Prisma">
   <img src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite" alt="SQLite">
   <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker" alt="Docker">
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License">
 </p>
 
 <h1 align="center">WikiFlow</h1>
@@ -150,7 +150,7 @@ docker/
 
 ### License
 
-MIT
+[AGPL-3.0](LICENSE)
 
 ---
 
@@ -284,4 +284,4 @@ docker/
 
 ### 许可证
 
-MIT
+[AGPL-3.0](LICENSE)
